@@ -1,0 +1,14 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    ".vscode": true,
+    ".gitignore": true,
+    "node_modules": true,
+    "public": true,
+    "index.html": true,
+    "package.json": true,
+    "tsconfig.json": true,
+    "vite.config.js": true,
+    "yarn.lock": true
+  }
+}

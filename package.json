@@ -1,0 +1,17 @@
+{
+  "name": "vdom-hello",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build"
+  },
+  "prettier": {
+    "semi": false,
+    "arrowParens": "avoid",
+    "singleQuote": true
+  },
+  "devDependencies": {
+    "typescript": "^4.2.3",
+    "vite": "^2.2.3"
+  }
+}
