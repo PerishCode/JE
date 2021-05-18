@@ -3,16 +3,16 @@ import { mount } from '@/modules/fire'
 
 const source = reactive({
   a: {
-    tag: 'div',
-    text: $((node: any) => node.$.b.text + node.$.c.text),
+    tag: 'span',
+    text: $((node: any) => node.$.b.text + node.$.c.value),
   },
   b: {
-    tag: 'div',
+    tag: 'h2',
     text: 'hello',
   },
   c: {
-    tag: 'div',
-    text: 'world',
+    tag: 'input',
+    value: 'world',
   },
 })
 

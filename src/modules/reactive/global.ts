@@ -29,8 +29,20 @@ const raw2visited = new WeakMapExtension<Raw, Set<Key>>()
 
 const callbackStack = new Array<Callback>()
 
+function getReaction(raw: Raw) {
+  return raw2reaction.get(raw)
+}
+
+function getRaw(reaction: Reaction) {
+  return reaction2raw.get(reaction)
+}
+
 function getCallbackMap(raw: Raw) {
   return raw2callbackMap.get(raw) ?? raw2callbackMap.get(reaction2raw.get(raw)!)
+}
+
+function getListenerMap(raw: Raw) {
+  return raw2ListenerMap.get(raw) ?? raw2ListenerMap.get(reaction2raw.get(raw)!)
 }
 
 export {
@@ -46,4 +58,4 @@ export {
   WeakMapExtension,
 }
 
-export { getCallbackMap }
+export { getReaction, getRaw, getCallbackMap, getListenerMap }

@@ -7,13 +7,16 @@ import {
 
 import { WeakMapExtension, MapExtension } from './types'
 
-import { getCallbackMap } from './global'
+import { getCallbackMap, getListenerMap, getRaw, getReaction } from './global'
 
 export {
   reactive,
   observe,
   unobserve,
   wrapFunctionAsDependency,
+  getReaction,
+  getRaw,
+  getListenerMap,
   getCallbackMap,
   WeakMapExtension,
   MapExtension,

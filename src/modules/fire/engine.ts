@@ -1,5 +1,6 @@
-import { MapExtension, observe } from '@/modules/reactive'
+import { MapExtension, observe, getRaw } from '@/modules/reactive'
 import { reaction2elementMap } from './global'
+import { TagHandler } from './types'
 
 function mountElement(source: any, key: any, element: HTMLElement) {
   return reaction2elementMap
@@ -17,36 +18,96 @@ function updateElement(source: any, key: any, element: HTMLElement) {
   elementMap.set(key, element)
 }
 
-function generateObservation(root: HTMLElement, source: any, key: any) {
-  return (operation: any = {}) => {
-    const target = source[key]
+const commonTagSet = new Set(['div', 'span', 'h1', 'h2', 'h3'])
 
-    switch (operation.type) {
-      case 'set':
-      case 'add':
-      case 'delete':
-        reaction2elementMap.get(source)?.get(key)?.remove()
+const inputTagSet = new Set(['input', 'select'])
 
-      case undefined: {
-        observe((innerOperation: any = {}) => {
-          const operationHandler = {
-            set: () =>
-              updateElement(source, key, document.createElement(target.tag)),
-            delete: () => reaction2elementMap.get(source)?.get(key)?.remove(),
-            add: () =>
-              root.appendChild(
-                mountElement(source, key, document.createElement(target.tag))
-              ),
-          }
-          operationHandler[innerOperation.type || 'add']()
-        })
+function getTagHandler(tag: string = ''): TagHandler {
+  if (commonTagSet.has(tag))
+    return (operation, root, source, key, target) => {
+      switch (operation.type) {
+        case 'set':
+        case 'add':
+        case 'delete':
+          reaction2elementMap.get(source)?.get(key)?.remove()
 
-        observe(() => {
-          const element = reaction2elementMap.get(source)?.get(key)
-          element && (element.textContent = target.text)
-        })
+        case undefined: {
+          observe((innerOperation: any = {}) => {
+            const operationHandler = {
+              set: () =>
+                updateElement(source, key, document.createElement(target.tag)),
+              delete: () => reaction2elementMap.get(source)?.get(key)?.remove(),
+              add: () =>
+                root.appendChild(
+                  mountElement(source, key, document.createElement(target.tag))
+                ),
+            }
+            operationHandler[innerOperation.type || 'add']()
+          })
+
+          observe(() => {
+            const element = reaction2elementMap.get(source)?.get(key)
+            element && (element.textContent = target.text)
+          })
+        }
       }
     }
+
+  if (inputTagSet.has(tag))
+    return (operation, root, source, key, target) => {
+      switch (operation.type) {
+        case 'set':
+        case 'add':
+        case 'delete':
+          reaction2elementMap.get(source)?.get(key)?.remove()
+
+        case undefined: {
+          observe((innerOperation: any = {}) => {
+            const operationHandler = {
+              set: () =>
+                updateElement(source, key, document.createElement(target.tag)),
+              delete: () => reaction2elementMap.get(source)?.get(key)?.remove(),
+              add: () => {
+                const element = document.createElement(
+                  target.tag
+                ) as HTMLInputElement
+                element.addEventListener('input', (e: any) => {
+                  target.value = e.target.value
+                })
+
+                root.appendChild(mountElement(source, key, element))
+              },
+            }
+            operationHandler[innerOperation.type || 'add']()
+          })
+
+          observe(() => {
+            const element: any = reaction2elementMap.get(source)?.get(key)
+            element && (element.value = target.value ?? '')
+          })
+        }
+      }
+    }
+
+  return () => {}
+}
+
+/**
+ * 对 Schema 的每一项属性添加监听
+ *
+ * @param root Schema 要挂载的目标 Element
+ * @param source Schema 对象
+ * @param key Schema 每一项的关键字
+ * @returns
+ */
+function generateObservation(root: HTMLElement, source: any, key: any) {
+  return (operation: any = {}) => {
+    const target: any = source[key]
+    const raw: any = getRaw(target)
+
+    const tagHandler = getTagHandler(raw.tag)
+
+    tagHandler(operation, root, source, key, target)
   }
 }
 
