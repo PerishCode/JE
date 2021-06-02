@@ -7,9 +7,10 @@ import {
   raw2visited,
   callbackStack,
   MapExtension,
+  callback2FunctionMap,
 } from './global'
 import { isDependencyFunction, isIterateFunction, isObject } from './utils'
-import { Callback, Opeartion, Raw } from './types'
+import { Callback, ObserveFunction, Opeartion, Raw } from './types'
 import {
   __cleaners__,
   __dependency__,
@@ -36,15 +37,18 @@ function wrapFunctionAsCallback(
   if (callbackStack.includes(callback)) return
 
   callbackStack.push(callback)
+
+  callback2FunctionMap.set(callback, f)
   const result = Reflect.apply(f, context, args)
   callback[__observed__] = true
   callback[__cleaners__] = []
+
   callbackStack.pop()
 
   return result
 }
 
-function observe(f: Function): Callback {
+function observe(f: ObserveFunction): Callback {
   const callback = (...args: any[]) =>
     wrapFunctionAsCallback(callback, f, this, args)
   callback()
@@ -78,7 +82,11 @@ function mountCallback(callback: Callback, { target, key }: Opeartion) {
 
   if (callbackSet.has(callback)) return
 
-  console.log('mount', target, key)
+  console.log(
+    '@',
+    typeof key === 'symbol' ? '[' + key.description + ']' : key,
+    callback2FunctionMap.get(callback)?.name
+  )
 
   callbackSet.add(callback)
   callback[__cleaners__]?.push(callbackSet)

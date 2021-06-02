@@ -38,10 +38,17 @@ interface Opeartion {
   oldValue?: any
 }
 
+type ObserveFunction =
+  | Function
+  | {
+      (operation: Opeartion): any
+    }
+
 export {
   Key,
   Raw,
   Reaction,
+  ObserveFunction,
   Callback,
   CallbackSet,
   CallbackMap,
